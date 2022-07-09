@@ -24,21 +24,67 @@ class GameViewController: UIViewController {
         setupScene()
         setupCamera()
         setupView()
+        createLifeSaverNodes()
 
         // add gestures to scnView
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        pan.maximumNumberOfTouches = 1  // prevents panning during rotation
-        scnView.addGestureRecognizer(pan)
-
-        let lifeSaverNode1 = LifeSaverNode()
-        lifeSaverNode1.position = SCNVector3(0, 0.5, 0)
-        scnScene.rootNode.addChildNode(lifeSaverNode1)
-        
-        let lifeSaverNode2 = LifeSaverNode()
-        lifeSaverNode2.position = SCNVector3(0, -0.5, 0)
-        scnScene.rootNode.addChildNode(lifeSaverNode2)
+        pan.maximumNumberOfTouches = 1
+//        scnView.addGestureRecognizer(pan)
     }
     
+    // space 12 life savers equal distances around an ellipse
+    func createLifeSaverNodes() {
+        let a = 1.3
+        let b = 2.4
+        let lifeSaverCount = 12
+        let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // good approximation, if b < 3 * a
+        let desiredSpacing = circumference / Double(lifeSaverCount)
+        let testCount = 200
+        var pastX = 10.0
+        var pastY = 10.0
+        var count = 0
+        for n in 0..<testCount {
+            let theta = Double(n) * 2 * Double.pi / Double(testCount)
+            let sinT2 = pow(sin(theta), 2)
+            let cosT2 = pow(cos(theta), 2)
+            let radius = a * b / sqrt(a * a * sinT2 + b * b * cosT2)
+            let x = radius * cos(theta)
+            let y = radius * sin(theta)
+            let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
+            if spacing > desiredSpacing {
+                let lifeSaverNode = LifeSaverNode()
+                lifeSaverNode.position = SCNVector3(radius * cos(theta), radius * sin(theta), 0)
+                lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
+                let spinAroundYAxis = SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 2))
+                lifeSaverNode.runAction(spinAroundYAxis)
+                scnScene.rootNode.addChildNode(lifeSaverNode)
+                count += 1
+                if count == lifeSaverCount { break }
+                pastX = x
+                pastY = y
+            }
+        }
+    }
+    
+    // space 12 life savers at equal angles around an ellipse (equal distances between life savers would look better)
+    func createLifeSaverNodes2() {
+        let a = 1.2
+        let b = 2.5
+        let lifeSaverCount = 12
+        for n in 0..<lifeSaverCount {
+            let theta = Double(n) * 2 * Double.pi / Double(lifeSaverCount)
+            let sinT2 = pow(sin(theta), 2)
+            let cosT2 = pow(cos(theta), 2)
+            let radius = a * b / sqrt(a * a * sinT2 + b * b * cosT2)
+            let lifeSaverNode = LifeSaverNode()
+            lifeSaverNode.position = SCNVector3(radius * cos(theta), radius * sin(theta), 0)
+            lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
+            let spinAroundYAxis = SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 2))
+            lifeSaverNode.runAction(spinAroundYAxis)
+            scnScene.rootNode.addChildNode(lifeSaverNode)
+        }
+    }
+
     // MARK: - Gesture actions
     
     // if panning on a life saver node, move it with the pan gesture
@@ -100,7 +146,7 @@ class GameViewController: UIViewController {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
 //        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg (looking down)
-        rotateCameraAroundBoardCenter(deltaAngle: 0)  // move up 45 deg (looking down)
+        rotateCameraAroundBoardCenter(deltaAngle: 0)  // look at front
         scnScene.rootNode.addChildNode(cameraNode)
     }
 
@@ -108,13 +154,13 @@ class GameViewController: UIViewController {
     private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
         cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
         let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
-        let cameraDistance = CGFloat(3)
+        let cameraDistance = CGFloat(6)
         cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
     }
 
     private func setupView() {
         scnView = self.view as? SCNView
-        scnView.allowsCameraControl = false  // true: allow standard camera controls with swiping
+        scnView.allowsCameraControl = true  // true: allow standard camera controls with swiping
         scnView.showsStatistics = true
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
