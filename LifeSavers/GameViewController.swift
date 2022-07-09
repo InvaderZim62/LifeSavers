@@ -9,6 +9,10 @@ import UIKit
 import QuartzCore
 import SceneKit
 
+struct Constants {
+    static let lifeSaverCount = 12  // don't change this number
+}
+
 class GameViewController: UIViewController {
     
     var scnScene: SCNScene!
@@ -33,11 +37,11 @@ class GameViewController: UIViewController {
     
     // compute 12 equally-spaced positions around an ellipse
     func computeStartingPositions() {
-        let a = 1.3
-        let b = 2.4
-        let lifeSaverCount = 12
+        let a = 1.3  // horizontal radius
+        let b = 2.4  // vertical radius
         let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
-        let desiredSpacing = circumference / Double(lifeSaverCount)
+        // Note: will have less than 12 life savers, if circumference is over-estimated
+        let desiredSpacing = circumference / Double(Constants.lifeSaverCount)
         let testCount = 200
         var pastX = 10.0
         var pastY = 10.0
@@ -53,7 +57,7 @@ class GameViewController: UIViewController {
             if spacing > desiredSpacing {
                 startingPositions.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
                 count += 1
-                if count == lifeSaverCount { break }
+                if count == Constants.lifeSaverCount { break }
                 pastX = x
                 pastY = y
             }
