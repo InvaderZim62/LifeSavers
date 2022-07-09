@@ -15,7 +15,7 @@ class GameViewController: UIViewController {
     var cameraNode: SCNNode!
     var scnView: SCNView!
     
-    var lifeSaverNodes = [LifeSaverNode]()    
+    var lifeSaverNodes = [LifeSaverNode]()
     var pastAngle: Float = 0.0
 
     override func viewDidLoad() {
@@ -25,9 +25,7 @@ class GameViewController: UIViewController {
         setupView()
         createLifeSaverNodes()
 
-        // add gestures to scnView
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        pan.maximumNumberOfTouches = 1
         scnView.addGestureRecognizer(pan)
     }
     
@@ -51,11 +49,9 @@ class GameViewController: UIViewController {
             let y = radius * sin(theta)
             let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
             if spacing > desiredSpacing {
-                let lifeSaverNode = LifeSaverNode()
+                let lifeSaverNode = LifeSaverNode(number: count)
                 lifeSaverNode.position = SCNVector3(radius * cos(theta), radius * sin(theta), 0)
                 lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
-//                let spinAroundYAxis = SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 2))
-//                lifeSaverNode.runAction(spinAroundYAxis)
                 lifeSaverNodes.append(lifeSaverNode)
                 scnScene.rootNode.addChildNode(lifeSaverNode)
                 count += 1
