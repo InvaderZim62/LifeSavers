@@ -16,6 +16,7 @@ class GameViewController: UIViewController {
     var scnView: SCNView!
     
     var lifeSaverNodes = [LifeSaverNode]()
+    var startingPositions = [SCNVector3]()
     var pastAngle: Float = 0.0
 
     override func viewDidLoad() {
@@ -23,14 +24,15 @@ class GameViewController: UIViewController {
         setupScene()
         setupCamera()
         setupView()
+        computeStartingPositions()
         createLifeSaverNodes()
 
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         scnView.addGestureRecognizer(pan)
     }
     
-    // equally space 12 life savers around an ellipse
-    func createLifeSaverNodes() {
+    // compute 12 equally-spaced positions around an ellipse
+    func computeStartingPositions() {
         let a = 1.3
         let b = 2.4
         let lifeSaverCount = 12
@@ -49,16 +51,22 @@ class GameViewController: UIViewController {
             let y = radius * sin(theta)
             let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
             if spacing > desiredSpacing {
-                let lifeSaverNode = LifeSaverNode(number: count)
-                lifeSaverNode.position = SCNVector3(radius * cos(theta), radius * sin(theta), 0)
-                lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
-                lifeSaverNodes.append(lifeSaverNode)
-                scnScene.rootNode.addChildNode(lifeSaverNode)
+                startingPositions.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
                 count += 1
                 if count == lifeSaverCount { break }
                 pastX = x
                 pastY = y
             }
+        }
+    }
+    
+    func createLifeSaverNodes() {
+        for (index, startingPosition) in startingPositions.enumerated() {
+            let lifeSaverNode = LifeSaverNode(number: index)
+            lifeSaverNode.position = startingPosition
+            lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
+            lifeSaverNodes.append(lifeSaverNode)
+            scnScene.rootNode.addChildNode(lifeSaverNode)
         }
     }
 
