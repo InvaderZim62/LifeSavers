@@ -26,6 +26,16 @@ class GameViewController: UIViewController {
     var lifeSaverNodes = [LifeSaverNode]()
     var startingPositions = [SCNVector3]()
     var pastAngle: Float = 0.0
+    
+    var selectedLifeSaverNode: LifeSaverNode? {
+        didSet {
+            if let selectedLifeSaverNode = selectedLifeSaverNode {
+                let startingPosition = startingPositions[selectedLifeSaverNode.number]
+                let forwardPosition = SCNVector3(startingPosition.x, startingPosition.y, startingPosition.z + 1)
+                selectedLifeSaverNode.position = forwardPosition
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,6 +47,9 @@ class GameViewController: UIViewController {
 
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         scnView.addGestureRecognizer(pan)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tap.require(toFail: pan)  // prevents tap from being called right before pan gesture ends (deselecting dominoNode)
+        scnView.addGestureRecognizer(tap)
     }
     
     // compute 12 equally-spaced positions around an ellipse
@@ -77,9 +90,34 @@ class GameViewController: UIViewController {
             scnScene.rootNode.addChildNode(lifeSaverNode)
         }
     }
-
-    // MARK: - Gesture actions
     
+    // MARK: - Gesture actions
+
+    // select/deselect domino node
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {  // Note: panning always starts with a tap
+        let location = recognizer.location(in: scnView)
+        lifeSaverNodes.forEach { $0.position = startingPositions[$0.number] }
+        if let tappedLifeSaver = getLifeSaverNodeAt(location) {
+            if tappedLifeSaver == selectedLifeSaverNode {
+                selectedLifeSaverNode = nil
+            } else {
+                selectedLifeSaverNode = tappedLifeSaver
+            }
+        } else {
+            selectedLifeSaverNode = nil
+        }
+    }
+    
+    // get life saver node at location provided by tap gesture
+    private func getLifeSaverNodeAt(_ location: CGPoint) -> LifeSaverNode? {
+        var lifeSaverNode: LifeSaverNode?
+        let hitResults = scnView.hitTest(location, options: nil)  // nil returns closest hit
+        if let result = hitResults.first(where: { $0.node.name == "Life Saver" }) {
+            lifeSaverNode = result.node as? LifeSaverNode
+        }
+        return lifeSaverNode
+    }
+
     // rotate all life savers, if panning screen
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
@@ -104,7 +142,7 @@ class GameViewController: UIViewController {
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3(0, 0, 5)
+        cameraNode.position = SCNVector3(0, 0, 6)
         scnScene.rootNode.addChildNode(cameraNode)
     }
     
