@@ -4,6 +4,10 @@
 //
 //  Created by Phil Stern on 6/26/22.
 //
+//  To do...
+//  - shuffle lifeSaverNodes array
+//  - arbitrarily rotate lifeSaverNodes about z-axis (default gives away part of puzzle solution)
+//
 
 import UIKit
 import QuartzCore
@@ -72,7 +76,6 @@ class GameViewController: UIViewController {
             lifeSaverNodes.append(lifeSaverNode)
             scnScene.rootNode.addChildNode(lifeSaverNode)
         }
-        // pws: need to shuffle lifeSaverNodes array
     }
 
     // MARK: - Gesture actions
@@ -101,19 +104,10 @@ class GameViewController: UIViewController {
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-//        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg (looking down)
-        rotateCameraAroundBoardCenter(deltaAngle: 0)  // look at front
+        cameraNode.position = SCNVector3(0, 0, 5)
         scnScene.rootNode.addChildNode(cameraNode)
     }
-
-    // rotate camera around scene x-axis, while continuing to point at scene center
-    private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
-        cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
-        let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
-        let cameraDistance = CGFloat(6)
-        cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
-    }
-
+    
     private func setupView() {
         scnView = self.view as? SCNView
         scnView.allowsCameraControl = false  // true: allow standard camera controls with swiping
