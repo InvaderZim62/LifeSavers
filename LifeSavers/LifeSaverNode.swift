@@ -20,7 +20,8 @@ class LifeSaverNode: SCNNode {
         super.init()
         name = "Life Saver"
         self.number = number
-        let scene = SCNScene(named: "art.scnassets/LifeSaver.scn")!
+        let fileName = "art.scnassets/life saver " + String(number) + ".scn"  // ex. art.scnassets/life saver 7.scn"
+        let scene = SCNScene(named: fileName)!
         let node = scene.rootNode.childNode(withName: "LifeSaver", recursively: true)!
         geometry = node.geometry
     }
