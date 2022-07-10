@@ -70,7 +70,7 @@ class GameViewController: UIViewController {
     
     func createLifeSaverNodes() {
         for (index, startingPosition) in startingPositions.enumerated() {
-            let lifeSaverNode = LifeSaverNode(number: index + 1)
+            let lifeSaverNode = LifeSaverNode(number: index)
             lifeSaverNode.position = startingPosition
             lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
             lifeSaverNodes.append(lifeSaverNode)
