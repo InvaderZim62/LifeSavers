@@ -18,7 +18,7 @@ struct Constants {
     static let cameraDistance: Float = 6
     static let tapZoomFactor: Float = 0.9  // percent of distance to camera offset a node moves when tapped
     static let tapZoomOffset: Float = 2    // distance in front of camera a node moves toward when tapped
-    static let moveDuration = 0.3
+    static let moveDuration = 0.3          // seconds
 }
 
 class GameViewController: UIViewController {
@@ -31,8 +31,10 @@ class GameViewController: UIViewController {
     var startingPositions = [SCNVector3]()
     var pastAngle: Float = 0.0
     
+    // move selected node closer to camera, move all others back (animated)
     var selectedLifeSaverNode: LifeSaverNode? {
         didSet {
+            lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }  // move all nodes back
             if let selectedLifeSaverNode = selectedLifeSaverNode {
                 let startingPosition = startingPositions[selectedLifeSaverNode.number]
                 let forwardPosition = SCNVector3(startingPosition.x * (1 - Constants.tapZoomFactor),
@@ -101,7 +103,6 @@ class GameViewController: UIViewController {
     // select/deselect domino node
     @objc func handleTap(recognizer: UITapGestureRecognizer) {  // Note: panning always starts with a tap
         let location = recognizer.location(in: scnView)
-        lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }
         if let tappedLifeSaver = getLifeSaverNodeAt(location) {
             if tappedLifeSaver == selectedLifeSaverNode {
                 selectedLifeSaverNode = nil
