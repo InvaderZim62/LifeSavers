@@ -7,6 +7,7 @@
 
 import UIKit
 import SceneKit
+import SpriteKit
 
 enum Position {
     case north
@@ -40,6 +41,8 @@ class LifeSaverNode: SCNNode {
         let scene = SCNScene(named: fileName)!
         let node = scene.rootNode.childNode(withName: "LifeSaver", recursively: true)!
         geometry = node.geometry
+//        geometry = SCNCylinder(radius: 0.25, height: 0.05)
+//        geometry?.firstMaterial?.diffuse.contents = UIColor.green  // overwritten by label fillColor
         switch number {
         case 0:
             features = [.hole(.north), .longPegFront(.west)]
@@ -68,5 +71,33 @@ class LifeSaverNode: SCNNode {
         default:
             break
         }
+        addLabel(text: String(number))
+    }
+
+    // from: https://stackoverflow.com/questions/49600303 (also see roulette)
+    // label position was set by trial and error (starting with very large font), since surface is wrapped around whole shape
+    private func addLabel(text: String) {
+        let size = 300.0  // bigger gives higher resolution (smaller font size)
+        let scene = SKScene(size: CGSize(width: size, height: size))
+
+        let rectangle = SKShapeNode(rect: CGRect(x: 0, y: 0, width: size, height: size), cornerRadius: 0)
+        rectangle.fillColor = UIColor.white
+
+        let label = SKLabelNode(text: text)
+        label.fontSize = 18
+        label.numberOfLines = 0
+        label.fontColor = UIColor.black
+        label.fontName = "Helvetica-Bold"
+        label.position = CGPoint(x: 0.25 * size, y: 0.43 * size)  // origin at bottom left corner (x pos right, y pos up)
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+
+        scene.addChild(rectangle)
+        scene.addChild(label)
+
+        let material = SCNMaterial()
+        material.diffuse.contents = scene
+        geometry?.materials = [material]
+        geometry?.firstMaterial?.diffuse.contentsTransform = SCNMatrix4Translate(SCNMatrix4MakeScale(1, -1, 1), 0, 1, 0)
     }
 }
