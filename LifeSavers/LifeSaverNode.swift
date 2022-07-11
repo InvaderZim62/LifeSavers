@@ -25,7 +25,7 @@ enum Feature {
 
 class LifeSaverNode: SCNNode {
     
-    var number = 0
+    var number = 0  // pws: may not need to save number
     var features = [Feature]()
     
     required init?(coder: NSCoder) {

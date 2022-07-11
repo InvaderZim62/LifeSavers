@@ -100,12 +100,12 @@ class GameViewController: UIViewController {
     
     // MARK: - Gesture actions
 
-    // select/deselect domino node
-    @objc func handleTap(recognizer: UITapGestureRecognizer) {  // Note: panning always starts with a tap
+    // select/deselect life saver node (causes it to move closer to camera)
+    @objc func handleTap(recognizer: UITapGestureRecognizer) {
         let location = recognizer.location(in: scnView)
         if let tappedLifeSaver = getLifeSaverNodeAt(location) {
             if tappedLifeSaver == selectedLifeSaverNode {
-                selectedLifeSaverNode = nil
+                selectedLifeSaverNode = nil  // deselect life saver if tapped while selected
             } else {
                 selectedLifeSaverNode = tappedLifeSaver
             }
