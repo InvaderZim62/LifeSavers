@@ -14,7 +14,11 @@ import QuartzCore
 import SceneKit
 
 struct Constants {
-    static let lifeSaverCount = 12  // don't change this number
+    static let lifeSaverCount = 12         // don't change this number
+    static let cameraDistance: Float = 6
+    static let tapZoomFactor: Float = 0.9  // percent of distance to camera offset a node moves when tapped
+    static let tapZoomOffset: Float = 2    // distance in front of camera a node moves toward when tapped
+    static let moveDuration = 0.3
 }
 
 class GameViewController: UIViewController {
@@ -31,8 +35,10 @@ class GameViewController: UIViewController {
         didSet {
             if let selectedLifeSaverNode = selectedLifeSaverNode {
                 let startingPosition = startingPositions[selectedLifeSaverNode.number]
-                let forwardPosition = SCNVector3(startingPosition.x, startingPosition.y, startingPosition.z + 1)
-                selectedLifeSaverNode.position = forwardPosition
+                let forwardPosition = SCNVector3(startingPosition.x * (1 - Constants.tapZoomFactor),
+                                                 startingPosition.y * (1 - Constants.tapZoomFactor),
+                                                 (Constants.cameraDistance - Constants.tapZoomOffset) * Constants.tapZoomFactor)
+                selectedLifeSaverNode.runAction(SCNAction.move(to: forwardPosition, duration: Constants.moveDuration))
             }
         }
     }
@@ -48,7 +54,6 @@ class GameViewController: UIViewController {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         scnView.addGestureRecognizer(pan)
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        tap.require(toFail: pan)  // prevents tap from being called right before pan gesture ends (deselecting dominoNode)
         scnView.addGestureRecognizer(tap)
     }
     
@@ -96,7 +101,7 @@ class GameViewController: UIViewController {
     // select/deselect domino node
     @objc func handleTap(recognizer: UITapGestureRecognizer) {  // Note: panning always starts with a tap
         let location = recognizer.location(in: scnView)
-        lifeSaverNodes.forEach { $0.position = startingPositions[$0.number] }
+        lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }
         if let tappedLifeSaver = getLifeSaverNodeAt(location) {
             if tappedLifeSaver == selectedLifeSaverNode {
                 selectedLifeSaverNode = nil
@@ -142,7 +147,7 @@ class GameViewController: UIViewController {
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3(0, 0, 6)
+        cameraNode.position = SCNVector3(0, 0, Constants.cameraDistance)
         scnScene.rootNode.addChildNode(cameraNode)
     }
     
