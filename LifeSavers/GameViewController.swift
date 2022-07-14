@@ -76,22 +76,21 @@ class GameViewController: UIViewController {
         }
     }
     
-    // rotate selected node 90 deg counter clock-wise
-    private func rotationControlSelected() {
+    // MARK: - Orientation changes
+    
+    private func rotateSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration))
         }
     }
     
-    // flip selected node 180 deg
-    private func flipControlSelected() {
+    private func flipSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration))
         }
     }
     
-    // move selected node to next open stack position
-    private func dropControlSelected() {
+    private func dropSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[piecesPlayed], duration: Constants.moveDuration))
         }
@@ -160,7 +159,9 @@ class GameViewController: UIViewController {
 
     private func setupHud() {
         hud = Hud(size: view.bounds.size)
-        hud.setup(rotationControlHandler: rotationControlSelected, flipControlHandler: flipControlSelected, dropControlHandler: dropControlSelected)
+        hud.setup(rotateControlHandler: rotateSelectedLifeSaver,
+                  flipControlHandler: flipSelectedLifeSaver,
+                  dropControlHandler: dropSelectedLifeSaver)
         scnView.overlaySKScene = hud
     }
     

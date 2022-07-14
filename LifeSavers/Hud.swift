@@ -12,10 +12,10 @@ import Foundation
 import SpriteKit
 
 class Hud: SKScene {
-    var nodeRotationHandler: (() -> Void)?
-    var nodeFlipHandler: (() -> Void)?
-    var nodeDropHandler: (() -> Void)?
-    var rotationSelectionNode = SKSpriteNode()
+    var rotateControlHandler: (() -> Void)?
+    var flipControlHandler: (() -> Void)?
+    var dropControlHandler: (() -> Void)?
+    var rotateSelectionNode = SKSpriteNode()
     var flipSelectionNode = SKSpriteNode()
     var dropSelectionNode = SKSpriteNode()
     let horizontalCircleTexture = SKTexture(imageNamed: "horizontal circle")
@@ -24,20 +24,20 @@ class Hud: SKScene {
 
     var orientationControlIsHidden: Bool = true {
         didSet {
-            rotationSelectionNode.isHidden = orientationControlIsHidden
+            rotateSelectionNode.isHidden = orientationControlIsHidden
             flipSelectionNode.isHidden = orientationControlIsHidden
             dropSelectionNode.isHidden = orientationControlIsHidden
         }
     }
     
-    func setup(rotationControlHandler: @escaping () -> Void, flipControlHandler: @escaping () -> Void, dropControlHandler: @escaping () -> Void) {
-        self.nodeRotationHandler = rotationControlHandler
-        self.nodeFlipHandler = flipControlHandler
-        self.nodeDropHandler = dropControlHandler
+    func setup(rotateControlHandler: @escaping () -> Void, flipControlHandler: @escaping () -> Void, dropControlHandler: @escaping () -> Void) {
+        self.rotateControlHandler = rotateControlHandler
+        self.flipControlHandler = flipControlHandler
+        self.dropControlHandler = dropControlHandler
         
-        rotationSelectionNode = SKSpriteNode(texture: horizontalCircleTexture)
-        rotationSelectionNode.position = CGPoint(x: frame.midX, y: 0.7 * frame.height)  // near top, center
-        addChild(rotationSelectionNode)
+        rotateSelectionNode = SKSpriteNode(texture: horizontalCircleTexture)
+        rotateSelectionNode.position = CGPoint(x: frame.midX, y: 0.7 * frame.height)  // near top, center
+        addChild(rotateSelectionNode)
         
         flipSelectionNode = SKSpriteNode(texture: verticalCircleTexture)
         flipSelectionNode.position = CGPoint(x: 0.65 * frame.width, y: 0.62 * frame.height)  // near top, right
@@ -53,14 +53,14 @@ class Hud: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first!
         let location = touch.location(in: self)
-        if rotationSelectionNode.contains(location) {
-            nodeRotationHandler?()
+        if rotateSelectionNode.contains(location) {
+            rotateControlHandler?()
         }
         if flipSelectionNode.contains(location) {
-            nodeFlipHandler?()
+            flipControlHandler?()
         }
         if dropSelectionNode.contains(location) {
-            nodeDropHandler?()
+            dropControlHandler?()
         }
     }
 }
