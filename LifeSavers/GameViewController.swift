@@ -14,11 +14,10 @@ import QuartzCore
 import SceneKit
 
 struct Constants {
-    static let lifeSaverCount = 12         // don't change this number
-    static let cameraDistance: Float = 6
-    static let tapZoomFactor: Float = 0.9  // percent of distance to camera offset a node moves when tapped
-    static let tapZoomOffset: Float = 2    // distance in front of camera a node moves toward when tapped
-    static let moveDuration = 0.3          // seconds
+    static let lifeSaverCount = 12   // don't change this number
+    static let lifeSaverWidth = 0.1  // in screen units
+    static let cameraDistance = 6.0
+    static let moveDuration = 0.3    // seconds
 }
 
 class GameViewController: UIViewController {
@@ -27,20 +26,22 @@ class GameViewController: UIViewController {
     var cameraNode: SCNNode!
     var scnView: SCNView!
     
+    var hud = Hud()
     var lifeSaverNodes = [LifeSaverNode]()
     var startingPositions = [SCNVector3]()
+    var stackPositions = [SCNVector3]()
+    var holdingPosition = SCNVector3(0, 0.76, 0)
+    var piecesPlayed = 0
     var pastAngle: Float = 0.0
     
-    // move selected node closer to camera, move all others back (animated)
+    // move selected/tapped node to holding position, move all others back to starting position
     var selectedLifeSaverNode: LifeSaverNode? {
         didSet {
+            hud.rotationalControlIsHidden = selectedLifeSaverNode == nil
             lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }  // move all nodes back
             if let selectedLifeSaverNode = selectedLifeSaverNode {
-                let startingPosition = startingPositions[selectedLifeSaverNode.number]
-                let forwardPosition = SCNVector3(startingPosition.x * (1 - Constants.tapZoomFactor),
-                                                 startingPosition.y * (1 - Constants.tapZoomFactor),
-                                                 (Constants.cameraDistance - Constants.tapZoomOffset) * Constants.tapZoomFactor)
-                selectedLifeSaverNode.runAction(SCNAction.move(to: forwardPosition, duration: Constants.moveDuration))
+                selectedLifeSaverNode.runAction(SCNAction.move(to: holdingPosition, duration: Constants.moveDuration))
+                piecesPlayed += 1
             }
         }
     }
@@ -50,13 +51,22 @@ class GameViewController: UIViewController {
         setupScene()
         setupCamera()
         setupView()
+        setupHud()
         computeStartingPositions()
+        computeStackPositions()
         createLifeSaverNodes()
 
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        scnView.addGestureRecognizer(pan)
+//        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+//        scnView.addGestureRecognizer(pan)
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         scnView.addGestureRecognizer(tap)
+    }
+    
+    func computeStackPositions() {
+        for n in 0..<Constants.lifeSaverCount {
+            let y =  Constants.lifeSaverWidth * (Double(n) - Double(Constants.lifeSaverCount - 1) / 2)
+            stackPositions.append(SCNVector3(0, y, 0))
+        }
     }
     
     // compute 12 equally-spaced positions around an ellipse
@@ -92,12 +102,18 @@ class GameViewController: UIViewController {
         for (index, startingPosition) in startingPositions.enumerated() {
             let lifeSaverNode = LifeSaverNode(number: index)
             lifeSaverNode.position = startingPosition
-            lifeSaverNode.transform = SCNMatrix4Rotate(lifeSaverNode.transform, .pi / 2, 1, 0, 0)  // rotate perpendicular to screen, before spinning
             lifeSaverNodes.append(lifeSaverNode)
             scnScene.rootNode.addChildNode(lifeSaverNode)
         }
     }
     
+    // rotate selected node 90 deg counter clock-wise
+    private func rotationControlSelected() {
+        if let selectedLifeSaverNode = selectedLifeSaverNode {
+            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration))
+        }
+    }
+
     // MARK: - Gesture actions
 
     // select/deselect life saver node (causes it to move closer to camera)
@@ -109,12 +125,10 @@ class GameViewController: UIViewController {
             } else {
                 selectedLifeSaverNode = tappedLifeSaver
             }
-        } else {
-            selectedLifeSaverNode = nil
         }
     }
     
-    // get life saver node at location provided by tap gesture
+    // get life saver node at location provided by tap gesture (nil if none tapped)
     private func getLifeSaverNodeAt(_ location: CGPoint) -> LifeSaverNode? {
         var lifeSaverNode: LifeSaverNode?
         let hitResults = scnView.hitTest(location, options: nil)  // nil returns closest hit
@@ -154,10 +168,16 @@ class GameViewController: UIViewController {
     
     private func setupView() {
         scnView = self.view as? SCNView
-        scnView.allowsCameraControl = false  // true: allow standard camera controls with swiping
+        scnView.allowsCameraControl = true  // true: allow standard camera controls with swiping
         scnView.showsStatistics = true
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
         scnView.scene = scnScene
+    }
+
+    private func setupHud() {
+        hud = Hud(size: view.bounds.size)  // results in board filling up screen with space around sides
+        hud.setup(rotationControlHandler: rotationControlSelected)
+        scnView.overlaySKScene = hud
     }
 }

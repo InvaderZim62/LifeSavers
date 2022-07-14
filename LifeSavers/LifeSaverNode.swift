@@ -41,8 +41,6 @@ class LifeSaverNode: SCNNode {
         let scene = SCNScene(named: fileName)!
         let node = scene.rootNode.childNode(withName: "LifeSaver", recursively: true)!
         geometry = node.geometry
-//        geometry = SCNCylinder(radius: 0.25, height: 0.05)
-//        geometry?.firstMaterial?.diffuse.contents = UIColor.green  // overwritten by label fillColor
         switch number {
         case 0:
             features = [.hole(.north), .longPegFront(.west)]
