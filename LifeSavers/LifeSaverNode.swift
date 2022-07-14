@@ -27,6 +27,8 @@ enum Feature {
 class LifeSaverNode: SCNNode {
     
     var number = 0  // pws: may not need to save number
+    var isPlayed = false
+    var stackPosition = 0
     var features = [Feature]()
     
     required init?(coder: NSCoder) {

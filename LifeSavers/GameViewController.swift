@@ -31,17 +31,16 @@ class GameViewController: UIViewController {
     var startingPositions = [SCNVector3]()
     var stackPositions = [SCNVector3]()
     var holdingPosition = SCNVector3(0, 0.85, 0)
-    var piecesPlayed = 0
+    var playedCount = 0
     var pastAngle: Float = 0.0
     
     // move selected/tapped node to holding position, move all others back to starting position
     var selectedLifeSaverNode: LifeSaverNode? {
         didSet {
             hud.orientationControlIsHidden = selectedLifeSaverNode == nil
-            lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }  // move all nodes back
+            moveUnplayedLifeSaversToStartingPositions()
             if let selectedLifeSaverNode = selectedLifeSaverNode {
                 selectedLifeSaverNode.runAction(SCNAction.move(to: holdingPosition, duration: Constants.moveDuration))
-                piecesPlayed += 1
             }
         }
     }
@@ -60,10 +59,11 @@ class GameViewController: UIViewController {
         scnView.addGestureRecognizer(tap)
     }
     
-    func computeStackPositions() {
-        for n in 0..<Constants.lifeSaverCount {
-            let y =  Constants.lifeSaverWidth * (Double(n) - Double(Constants.lifeSaverCount - 1) / 2)
-            stackPositions.append(SCNVector3(0, y, 0))
+    func moveUnplayedLifeSaversToStartingPositions() {
+        lifeSaverNodes.forEach {
+            if !$0.isPlayed {
+                $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration))  // move unplayed nodes to start
+            }
         }
     }
     
@@ -92,7 +92,11 @@ class GameViewController: UIViewController {
     
     private func dropSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[piecesPlayed], duration: Constants.moveDuration))
+            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[playedCount], duration: Constants.moveDuration))
+            selectedLifeSaverNode.isPlayed = true
+            selectedLifeSaverNode.stackPosition = playedCount
+            self.selectedLifeSaverNode = nil
+            playedCount += 1
         }
     }
 
@@ -103,9 +107,17 @@ class GameViewController: UIViewController {
         let location = recognizer.location(in: scnView)
         if let tappedLifeSaver = getLifeSaverNodeAt(location) {
             if tappedLifeSaver == selectedLifeSaverNode {
-                selectedLifeSaverNode = nil  // deselect life saver if tapped while selected
+                // deselect life saver if tapped while selected
+                selectedLifeSaverNode = nil
             } else {
-                selectedLifeSaverNode = tappedLifeSaver
+                // select life saver if not yet played or if top of stack
+                if !tappedLifeSaver.isPlayed {
+                    selectedLifeSaverNode = tappedLifeSaver
+                } else if tappedLifeSaver.stackPosition == playedCount - 1 {
+                    tappedLifeSaver.isPlayed = false
+                    playedCount -= 1
+                    selectedLifeSaverNode = tappedLifeSaver
+                }
             }
         }
     }
@@ -167,6 +179,13 @@ class GameViewController: UIViewController {
     
     // MARK: - Utility functions
     
+    func computeStackPositions() {
+        for n in 0..<Constants.lifeSaverCount {
+            let y =  Constants.lifeSaverWidth * (Double(n) - Double(Constants.lifeSaverCount - 1) / 2)
+            stackPositions.append(SCNVector3(0, y, 0))
+        }
+    }
+
     // compute 12 equally-spaced positions around an ellipse
     func computeStartingPositions() {
         let a = 1.3  // horizontal radius
