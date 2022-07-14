@@ -30,14 +30,14 @@ class GameViewController: UIViewController {
     var lifeSaverNodes = [LifeSaverNode]()
     var startingPositions = [SCNVector3]()
     var stackPositions = [SCNVector3]()
-    var holdingPosition = SCNVector3(0, 0.76, 0)
+    var holdingPosition = SCNVector3(0, 0.85, 0)
     var piecesPlayed = 0
     var pastAngle: Float = 0.0
     
     // move selected/tapped node to holding position, move all others back to starting position
     var selectedLifeSaverNode: LifeSaverNode? {
         didSet {
-            hud.rotationalControlIsHidden = selectedLifeSaverNode == nil
+            hud.orientationControlIsHidden = selectedLifeSaverNode == nil
             lifeSaverNodes.forEach { $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration)) }  // move all nodes back
             if let selectedLifeSaverNode = selectedLifeSaverNode {
                 selectedLifeSaverNode.runAction(SCNAction.move(to: holdingPosition, duration: Constants.moveDuration))
@@ -56,8 +56,6 @@ class GameViewController: UIViewController {
         computeStackPositions()
         createLifeSaverNodes()
 
-//        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-//        scnView.addGestureRecognizer(pan)
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         scnView.addGestureRecognizer(tap)
     }
@@ -66,35 +64,6 @@ class GameViewController: UIViewController {
         for n in 0..<Constants.lifeSaverCount {
             let y =  Constants.lifeSaverWidth * (Double(n) - Double(Constants.lifeSaverCount - 1) / 2)
             stackPositions.append(SCNVector3(0, y, 0))
-        }
-    }
-    
-    // compute 12 equally-spaced positions around an ellipse
-    func computeStartingPositions() {
-        let a = 1.3  // horizontal radius
-        let b = 2.4  // vertical radius
-        let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
-        // Note: will have less than 12 life savers, if circumference is over-estimated
-        let desiredSpacing = circumference / Double(Constants.lifeSaverCount)
-        let testCount = 200
-        var pastX = 10.0
-        var pastY = 10.0
-        var count = 0
-        for n in 0..<testCount {
-            let theta = Double(n) * 2 * Double.pi / Double(testCount)
-            let sinT2 = pow(sin(theta), 2)
-            let cosT2 = pow(cos(theta), 2)
-            let radius = a * b / sqrt(a * a * sinT2 + b * b * cosT2)
-            let x = radius * cos(theta)
-            let y = radius * sin(theta)
-            let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
-            if spacing > desiredSpacing {
-                startingPositions.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
-                count += 1
-                if count == Constants.lifeSaverCount { break }
-                pastX = x
-                pastY = y
-            }
         }
     }
     
@@ -111,6 +80,20 @@ class GameViewController: UIViewController {
     private func rotationControlSelected() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration))
+        }
+    }
+    
+    // flip selected node 180 deg
+    private func flipControlSelected() {
+        if let selectedLifeSaverNode = selectedLifeSaverNode {
+            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration))
+        }
+    }
+    
+    // move selected node to next open stack position
+    private func dropControlSelected() {
+        if let selectedLifeSaverNode = selectedLifeSaverNode {
+            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[piecesPlayed], duration: Constants.moveDuration))
         }
     }
 
@@ -176,8 +159,39 @@ class GameViewController: UIViewController {
     }
 
     private func setupHud() {
-        hud = Hud(size: view.bounds.size)  // results in board filling up screen with space around sides
-        hud.setup(rotationControlHandler: rotationControlSelected)
+        hud = Hud(size: view.bounds.size)
+        hud.setup(rotationControlHandler: rotationControlSelected, flipControlHandler: flipControlSelected, dropControlHandler: dropControlSelected)
         scnView.overlaySKScene = hud
+    }
+    
+    // MARK: - Utility functions
+    
+    // compute 12 equally-spaced positions around an ellipse
+    func computeStartingPositions() {
+        let a = 1.3  // horizontal radius
+        let b = 2.4  // vertical radius
+        let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
+        // Note: will have less than 12 life savers, if circumference is over-estimated
+        let desiredSpacing = circumference / Double(Constants.lifeSaverCount)
+        let testCount = 200
+        var pastX = 10.0
+        var pastY = 10.0
+        var count = 0
+        for n in 0..<testCount {
+            let theta = Double(n) * 2 * Double.pi / Double(testCount)
+            let sinT2 = pow(sin(theta), 2)
+            let cosT2 = pow(cos(theta), 2)
+            let radius = a * b / sqrt(a * a * sinT2 + b * b * cosT2)
+            let x = radius * cos(theta)
+            let y = radius * sin(theta)
+            let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
+            if spacing > desiredSpacing {
+                startingPositions.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
+                count += 1
+                if count == Constants.lifeSaverCount { break }
+                pastX = x
+                pastY = y
+            }
+        }
     }
 }
