@@ -16,7 +16,7 @@ import SceneKit
 struct Constants {
     static let lifeSaverCount = 12   // don't change this number
     static let lifeSaverWidth = 0.1  // in screen units
-    static let cameraDistance = 6.0
+    static let cameraDistance = 5.0
     static let moveDuration = 0.3    // seconds
 }
 
@@ -181,15 +181,15 @@ class GameViewController: UIViewController {
     
     func computeStackPositions() {
         for n in 0..<Constants.lifeSaverCount {
-            let y =  Constants.lifeSaverWidth * (Double(n) - Double(Constants.lifeSaverCount - 1) / 2)
+            let y =  Constants.lifeSaverWidth * (Double(n - 4) - Double(Constants.lifeSaverCount - 1) / 2)
             stackPositions.append(SCNVector3(0, y, 0))
         }
     }
 
     // compute 12 equally-spaced positions around an ellipse
     func computeStartingPositions() {
-        let a = 1.3  // horizontal radius
-        let b = 2.4  // vertical radius
+        let a = 1.0  // horizontal radius
+        let b = 2.0  // vertical radius
         let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
         // Note: will have less than 12 life savers, if circumference is over-estimated
         let desiredSpacing = circumference / Double(Constants.lifeSaverCount)
