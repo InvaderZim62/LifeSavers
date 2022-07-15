@@ -59,7 +59,7 @@ class GameViewController: UIViewController {
         scnView.addGestureRecognizer(tap)
     }
     
-    func moveUnplayedLifeSaversToStartingPositions() {
+    private func moveUnplayedLifeSaversToStartingPositions() {
         lifeSaverNodes.forEach {
             if !$0.isPlayed {
                 $0.runAction(SCNAction.move(to: startingPositions[$0.number], duration: Constants.moveDuration))  // move unplayed nodes to start
@@ -67,7 +67,7 @@ class GameViewController: UIViewController {
         }
     }
     
-    func createLifeSaverNodes() {
+    private func createLifeSaverNodes() {
         for (index, startingPosition) in startingPositions.enumerated() {
             let lifeSaverNode = LifeSaverNode(number: index)
             lifeSaverNode.position = startingPosition
@@ -95,6 +95,7 @@ class GameViewController: UIViewController {
             selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[playedCount], duration: Constants.moveDuration))
             selectedLifeSaverNode.isPlayed = true
             selectedLifeSaverNode.stackPosition = playedCount
+            print(playedCount, selectedLifeSaverNode.eulerAngles)
             self.selectedLifeSaverNode = nil
             playedCount += 1
         }
@@ -103,7 +104,7 @@ class GameViewController: UIViewController {
     // MARK: - Gesture actions
 
     // select/deselect life saver node (causes it to move closer to camera)
-    @objc func handleTap(recognizer: UITapGestureRecognizer) {
+    @objc private func handleTap(recognizer: UITapGestureRecognizer) {
         let location = recognizer.location(in: scnView)
         if let tappedLifeSaver = getLifeSaverNodeAt(location) {
             if tappedLifeSaver == selectedLifeSaverNode {
@@ -133,7 +134,7 @@ class GameViewController: UIViewController {
     }
 
     // rotate all life savers, if panning screen
-    @objc func handlePan(recognizer: UIPanGestureRecognizer) {
+    @objc private func handlePan(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .changed:
             let location = recognizer.translation(in: recognizer.view)
@@ -179,7 +180,7 @@ class GameViewController: UIViewController {
     
     // MARK: - Utility functions
     
-    func computeStackPositions() {
+    private func computeStackPositions() {
         for n in 0..<Constants.lifeSaverCount {
             let y =  Constants.lifeSaverWidth * (Double(n - 4) - Double(Constants.lifeSaverCount - 1) / 2)
             stackPositions.append(SCNVector3(0, y, 0))
@@ -187,7 +188,7 @@ class GameViewController: UIViewController {
     }
 
     // compute 12 equally-spaced positions around an ellipse
-    func computeStartingPositions() {
+    private func computeStartingPositions() {
         let a = 1.0  // horizontal radius
         let b = 2.0  // vertical radius
         let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
