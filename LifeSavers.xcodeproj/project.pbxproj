@@ -14,8 +14,8 @@
 		4ACD9C582868C8450079A15D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ACD9C572868C8450079A15D /* Assets.xcassets */; };
 		4ACD9C5B2868C8450079A15D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ACD9C592868C8450079A15D /* LaunchScreen.storyboard */; };
 		4ACD9C82286A72800079A15D /* LifeSaverNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACD9C81286A72800079A15D /* LifeSaverNode.swift */; };
-		4ACD9CA3286AA9370079A15D /* SCNVector3Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACD9CA2286AA9370079A15D /* SCNVector3Extension.swift */; };
 		4ADD790A287F660E009FB532 /* Hud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADD7909287F660E009FB532 /* Hud.swift */; };
+		4ADD790E2884AE1D009FB532 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADD790D2884AE1D009FB532 /* Utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,8 +27,8 @@
 		4ACD9C572868C8450079A15D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4ACD9C5A2868C8450079A15D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4ACD9C81286A72800079A15D /* LifeSaverNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSaverNode.swift; sourceTree = "<group>"; };
-		4ACD9CA2286AA9370079A15D /* SCNVector3Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SCNVector3Extension.swift; sourceTree = "<group>"; };
 		4ADD7909287F660E009FB532 /* Hud.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Hud.swift; sourceTree = "<group>"; };
+		4ADD790D2884AE1D009FB532 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,7 +66,7 @@
 				4ACD9C522868C8430079A15D /* GameViewController.swift */,
 				4ACD9C81286A72800079A15D /* LifeSaverNode.swift */,
 				4ADD7909287F660E009FB532 /* Hud.swift */,
-				4ACD9CA2286AA9370079A15D /* SCNVector3Extension.swift */,
+				4ADD790D2884AE1D009FB532 /* Utilities.swift */,
 				4ACD9C502868C8430079A15D /* art.scnassets */,
 			);
 			path = LifeSavers;
@@ -154,11 +154,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ADD790E2884AE1D009FB532 /* Utilities.swift in Sources */,
 				4ADD790A287F660E009FB532 /* Hud.swift in Sources */,
 				4ACD9C532868C8430079A15D /* GameViewController.swift in Sources */,
 				4ACD9C4F2868C8430079A15D /* AppDelegate.swift in Sources */,
 				4ACD9C82286A72800079A15D /* LifeSaverNode.swift in Sources */,
-				4ACD9CA3286AA9370079A15D /* SCNVector3Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

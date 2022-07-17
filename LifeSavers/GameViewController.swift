@@ -41,6 +41,7 @@ class GameViewController: UIViewController {
             moveUnplayedLifeSaversToStartingPositions()
             if let selectedLifeSaverNode = selectedLifeSaverNode {
                 selectedLifeSaverNode.runAction(SCNAction.move(to: holdingPosition, duration: Constants.moveDuration))
+                canDrop()
             }
         }
     }
@@ -80,13 +81,18 @@ class GameViewController: UIViewController {
     
     private func rotateSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration))
+            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration)) {
+                // state not changed until action complete
+                self.canDrop()
+            }
         }
     }
     
     private func flipSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration))
+            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration)) {
+                self.canDrop()
+            }
         }
     }
     
@@ -95,10 +101,59 @@ class GameViewController: UIViewController {
             selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[playedCount], duration: Constants.moveDuration))
             selectedLifeSaverNode.isPlayed = true
             selectedLifeSaverNode.stackPosition = playedCount
-            print(playedCount, selectedLifeSaverNode.eulerAngles)
             self.selectedLifeSaverNode = nil
             playedCount += 1
         }
+    }
+    
+    var stack: [LifeSaverNode] {
+        lifeSaverNodes.filter { $0.isPlayed }.sorted(by: { $0.stackPosition < $1.stackPosition })
+    }
+    
+    private func canDrop() {
+        var canDrop = true
+        if stack.count > 0 {
+            let stackTop = stack.last!
+//            print()
+//            print("selected: \(selectedLifeSaverNode!)")
+//            print("          \(selectedLifeSaverNode!.eulerAngles)")
+//            print("stackTop: \(stackTop)")
+//            print("          \(stackTop.eulerAngles)")
+            
+            // check if pegs on bottom of selected life saver fit holes in top of stack
+            if let selectShortPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .shortPeg) : selectedLifeSaverNode!.back.firstIndex(of: .shortPeg) {
+                let stackIndex = indexOn(node: stackTop, alignedWith: selectedLifeSaverNode!, index: selectShortPegIndex)
+                if stackTop.front[stackIndex] != .hole {
+                    canDrop = false
+                }
+            }
+            if let selectLongPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .longPeg) : selectedLifeSaverNode!.back.firstIndex(of: .longPeg) {
+                let stackIndex = indexOn(node: stackTop, alignedWith: selectedLifeSaverNode!, index: selectLongPegIndex)
+                if stackTop.front[stackIndex] != .hole {
+                    canDrop = false
+                }
+            }
+            // check if pegs on top of stack fit holes in selected life saver
+            if let stackShortPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .shortPeg) : stackTop.front.firstIndex(of: .shortPeg) {
+                let selectIndex = indexOn(node: selectedLifeSaverNode!, alignedWith: stackTop, index: stackShortPegIndex)
+                if selectedLifeSaverNode!.front[selectIndex] != .hole {
+                    canDrop = false
+                }
+            }
+            if let stackLongPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .longPeg) : stackTop.front.firstIndex(of: .longPeg) {
+                let selectIndex = indexOn(node: selectedLifeSaverNode!, alignedWith: stackTop, index: stackLongPegIndex)
+                if selectedLifeSaverNode!.front[selectIndex] != .hole {
+                    canDrop = false
+                }
+            }
+        }
+        print("can drop: \(canDrop)")
+    }
+    
+    private func indexOn(node: LifeSaverNode, alignedWith node2: LifeSaverNode, index: Int) -> Int {
+        let vector2 = vectorFrom(index: index)
+        let vector = node2.convertVector(vector2, to: node)
+        return indexFrom(vector: vector)
     }
 
     // MARK: - Gesture actions
@@ -180,6 +235,18 @@ class GameViewController: UIViewController {
     
     // MARK: - Utility functions
     
+    // return unit vector along axis of index
+    // (0 = -z axis, 1 = +x axis, 2 = +z axis, 3 = -x axis)
+    private func vectorFrom(index: Int) -> SCNVector3 {
+        let positionAngle = .pi / 2 * Float(index - 1)  // angle of index position (0 along x-axis, pos clockwise)
+        return SCNVector3(cos(positionAngle), 0, sin(positionAngle))
+    }
+    
+    private func indexFrom(vector: SCNVector3) -> Int {
+        let positionAngle = atan2(vector.z, vector.x).wrap2Pi
+        return Int(round(2 * positionAngle / .pi) + 1) % 4
+    }
+
     private func computeStackPositions() {
         for n in 0..<Constants.lifeSaverCount {
             let y =  Constants.lifeSaverWidth * (Double(n - 4) - Double(Constants.lifeSaverCount - 1) / 2)

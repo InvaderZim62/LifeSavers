@@ -17,20 +17,32 @@ enum Position {
 }
 
 enum Feature {
-    case hole(Position)
-    case shortPegFront(Position)
-    case shortPegBack(Position)
-    case longPegFront(Position)
-    case longPegBack(Position)
+    case hole
+    case shortPeg
+    case longPeg
+    case none
 }
 
 class LifeSaverNode: SCNNode {
     
+    override var description: String {
+        "number: \(number), stackPosition: \(stackPosition), isPlayed: \(isPlayed), quarterTurns: \(quarterTurns), isFlipped: \(isFlipped)"
+    }
+
     var number = 0  // pws: may not need to save number
-    var isPlayed = false
     var stackPosition = 0
-    var features = [Feature]()
+    var isPlayed = false
+    var front = [Feature]()  // north, east, south, west side
+    var back = [Feature]()
     
+    var quarterTurns: Int {
+        Int((eulerAngles.y / (.pi / 2)).rounded()) % 4  // positive: counter-clockwise from front, clockwise from back
+    }
+    
+    var isFlipped: Bool {
+        Int((eulerAngles.x / .pi).rounded()) % 2 == 1
+    }
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
@@ -45,29 +57,41 @@ class LifeSaverNode: SCNNode {
         geometry = node.geometry
         switch number {
         case 0:
-            features = [.hole(.north), .longPegFront(.west)]
+            front = [.hole, .none, .none, .longPeg]
+            back = [.none, .none, .none, .none]
         case 1:
-            features = [.hole(.south), .hole(.west), .shortPegBack(.north)]
+            front = [.none, .none, .hole, .hole]
+            back = [.shortPeg, .none, .hole, .hole]
         case 2:
-            features = [.hole(.east), .hole(.west), .shortPegFront(.south), .shortPegBack(.south)]
+            front = [.none, .hole, .shortPeg, .hole]
+            back = [.none, .hole, .shortPeg, .hole]
         case 3:
-            features = [.hole(.east), .hole(.south), .shortPegFront(.west)]
+            front = [.none, .hole, .hole, .shortPeg]
+            back = [.none, .hole, .hole, .none]
         case 4:
-            features = [.hole(.north), .hole(.west), .shortPegFront(.east), .longPegBack(.east)]
+            front = [.hole, .shortPeg, .none, .hole]
+            back = [.hole, .longPeg, .none, .hole]
         case 5:
-            features = [.hole(.east), .hole(.south), .longPegFront(.north), .shortPegBack(.north)]
+            front = [.longPeg, .hole, .hole, .none]
+            back = [.shortPeg, .hole, .hole, .none]
         case 6:
-            features = [.hole(.north), .longPegFront(.east), .shortPegBack(.south)]
+            front = [.hole, .longPeg, .none, .none]
+            back = [.hole, .none, .shortPeg, .none]
         case 7:
-            features = [.hole(.north), .hole(.east), .hole(.west)]
+            front = [.hole, .hole, .none, .hole]
+            back = [.hole, .hole, .none, .hole]
         case 8:
-            features = [.hole(.east), .hole(.south), .shortPegFront(.west), .shortPegBack(.west)]
+            front = [.none, .hole, .hole, .shortPeg]
+            back = [.none, .hole, .hole, .shortPeg]
         case 9:
-            features = [.hole(.east), .hole(.west), .shortPegFront(.north), .shortPegBack(.south)]
+            front = [.shortPeg, .hole, .none, .hole]
+            back = [.none, .hole, .shortPeg, .hole]
         case 10:
-            features = [.hole(.north), .hole(.east), .shortPegFront(.south)]
+            front = [.hole, .hole, .shortPeg, .none]
+            back = [.hole, .hole, .none, .none]
         case 11:
-            features = [.hole(.south), .longPegBack(.east)]
+            front = [.none, .none, .hole, .none]
+            back = [.none, .longPeg, .hole, .none]
         default:
             break
         }
