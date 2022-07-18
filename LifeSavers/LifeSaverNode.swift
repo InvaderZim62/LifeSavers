@@ -29,7 +29,7 @@ class LifeSaverNode: SCNNode {
         "number: \(number), stackPosition: \(stackPosition), isPlayed: \(isPlayed), quarterTurns: \(quarterTurns), isFlipped: \(isFlipped)"
     }
 
-    var number = 0  // pws: may not need to save number
+    var number = 0
     var stackPosition = 0
     var isPlayed = false
     var front = [Feature]()  // north, east, south, west side
@@ -95,11 +95,12 @@ class LifeSaverNode: SCNNode {
         default:
             break
         }
-        addLabel(text: String(number))
+//        addLabel(text: String(number))  // use for debugging
     }
 
-    // from: https://stackoverflow.com/questions/49600303 (also see roulette)
+    // add text to top of face of life saver
     // label position was set by trial and error (starting with very large font), since surface is wrapped around whole shape
+    // from: https://stackoverflow.com/questions/49600303 (also see roulette)
     private func addLabel(text: String) {
         let size = 300.0  // bigger gives higher resolution (smaller font size)
         let scene = SKScene(size: CGSize(width: size, height: size))

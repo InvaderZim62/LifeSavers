@@ -4,10 +4,6 @@
 //
 //  Created by Phil Stern on 6/26/22.
 //
-//  To do...
-//  - shuffle lifeSaverNodes array
-//  - arbitrarily rotate lifeSaverNodes about z-axis (default gives away part of puzzle solution)
-//
 
 import UIKit
 import QuartzCore
@@ -75,6 +71,8 @@ class GameViewController: UIViewController {
         for (index, startingPosition) in startingPositions.enumerated() {
             let lifeSaverNode = LifeSaverNode(number: index)
             lifeSaverNode.position = startingPosition
+            lifeSaverNode.eulerAngles.y = [0, .pi / 2, .pi, 3 * .pi / 2].randomElement()!
+            lifeSaverNode.eulerAngles.x = [0, .pi].randomElement()!
             lifeSaverNodes.append(lifeSaverNode)
             scnScene.rootNode.addChildNode(lifeSaverNode)
         }
@@ -244,7 +242,7 @@ class GameViewController: UIViewController {
         }
     }
 
-    // compute 12 equally-spaced positions around an ellipse
+    // compute 12 equally-spaced (shuffled) positions around an ellipse
     private func computeStartingPositions() {
         let a = 1.0  // horizontal radius
         let b = 2.0  // vertical radius
@@ -271,5 +269,6 @@ class GameViewController: UIViewController {
                 pastY = y
             }
         }
+        startingPositions.shuffle()
     }
 }
