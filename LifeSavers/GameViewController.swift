@@ -31,9 +31,13 @@ class GameViewController: UIViewController {
     var startingPositions = [SCNVector3]()
     var stackPositions = [SCNVector3]()
     var holdingPosition = SCNVector3(0, 0.85, 0)
-    var playedCount = 0
+    var positionIndex = 0
     var pastAngle: Float = 0.0
     
+    var stack: [LifeSaverNode] {
+        lifeSaverNodes.filter { $0.isPlayed }.sorted(by: { $0.stackPosition < $1.stackPosition })
+    }
+
     // move selected/tapped node to holding position, move all others back to starting position
     var selectedLifeSaverNode: LifeSaverNode? {
         didSet {
@@ -95,58 +99,56 @@ class GameViewController: UIViewController {
     
     private func dropSelectedLifeSaver() {
         if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[playedCount], duration: Constants.moveDuration))
+            let gapSize = stackGap  // store it to avoid re-computing at each use
+            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
             selectedLifeSaverNode.isPlayed = true
-            selectedLifeSaverNode.stackPosition = playedCount
+            selectedLifeSaverNode.stackPosition = positionIndex + gapSize
             self.selectedLifeSaverNode = nil
-            playedCount += 1
+            positionIndex += (1 + gapSize)
         }
     }
     
-    var stack: [LifeSaverNode] {
-        lifeSaverNodes.filter { $0.isPlayed }.sorted(by: { $0.stackPosition < $1.stackPosition })
-    }
-    
-    // determine number of stack-levels blocked by pegs not aligning with holes (0 is a good fit)
-    private var levelsBlocked: Int {
-        var numberBlocked = 0
+    // determine number of stack spaces that will be left open if selected
+    // life saver is dropped onto stack (due to pegs not aligning with holes)
+    private var stackGap: Int {
+        var gapSize = 0
         if stack.count > 0 {
             let stackTop = stack.last!
             // check if pegs on bottom of selected life saver fit holes in top of stack
             if let selectShortPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .shortPeg) : selectedLifeSaverNode!.back.firstIndex(of: .shortPeg) {
                 let stackIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectShortPegIndex)
                 if stackTop.front[stackIndex] != .hole {
-                    numberBlocked += 1
+                    gapSize += 1
                 }
             } else if let selectLongPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .longPeg) : selectedLifeSaverNode!.back.firstIndex(of: .longPeg) {
                 let stackIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectLongPegIndex)
                 if stackTop.front[stackIndex] != .hole {
-                    numberBlocked += 1
+                    gapSize += 1
                 } else if stack.count > 1 {
                     // check if long peg fits hole in second-from-top of stack
                     let secondFromTop = stack[stack.count - 2]
                     let stackIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectLongPegIndex)
                     if secondFromTop.front[stackIndex] != .hole {
-                        numberBlocked += 1
+                        gapSize += 1
                     }
                 }
             }
-            if numberBlocked > 0 { return numberBlocked }
+            if gapSize > 0 { return gapSize }
             
             // check if pegs on top of stack fit holes in selected life saver
             if let stackShortPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .shortPeg) : stackTop.front.firstIndex(of: .shortPeg) {
                 let selectIndex = indexOnNode(selectedLifeSaverNode!, alignedWithNode: stackTop, atIndex: stackShortPegIndex)
                 if selectedLifeSaverNode!.front[selectIndex] != .hole {
-                    numberBlocked += 1
+                    gapSize += 1
                 }
             } else if let stackLongPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .longPeg) : stackTop.front.firstIndex(of: .longPeg) {
                 let selectIndex = indexOnNode(selectedLifeSaverNode!, alignedWithNode: stackTop, atIndex: stackLongPegIndex)
                 if selectedLifeSaverNode!.front[selectIndex] != .hole {
-                    numberBlocked += 1
+                    gapSize += 1
                 }
             }
         }
-        return numberBlocked
+        return gapSize
     }
     
     // determine which index of node1 aligns with the provided index of node2, by first computing a unit
@@ -171,9 +173,9 @@ class GameViewController: UIViewController {
                 // select life saver if not yet played or if top of stack
                 if !tappedLifeSaver.isPlayed {
                     selectedLifeSaverNode = tappedLifeSaver
-                } else if tappedLifeSaver.stackPosition == playedCount - 1 {
+                } else if tappedLifeSaver.stackPosition == positionIndex - 1 {
                     tappedLifeSaver.isPlayed = false
-                    playedCount -= 1
+                    positionIndex -= stack.count > 0 ? (tappedLifeSaver.stackPosition - stack.last!.stackPosition) : 1
                     selectedLifeSaverNode = tappedLifeSaver
                 }
             }
