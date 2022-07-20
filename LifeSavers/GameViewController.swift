@@ -96,6 +96,7 @@ class GameViewController: UIViewController {
     }
     
     private func dropSelectedLifeSaver() {
+        scnView.gestureRecognizers?.forEach { $0.isEnabled = false }  // temporarily disable gestures, to prevent simultaneous drop and tap (return to holding)
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             let gapSize = stackGap  // store it to avoid re-computing at each use
             selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
@@ -104,6 +105,7 @@ class GameViewController: UIViewController {
             self.selectedLifeSaverNode = nil
             positionIndex += (1 + gapSize)
         }
+        scnView.gestureRecognizers?.forEach { $0.isEnabled = true }
     }
     
     // determine number of stack spaces that will be left open if selected

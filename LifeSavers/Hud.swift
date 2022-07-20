@@ -36,15 +36,15 @@ class Hud: SKScene {
         self.dropControlHandler = dropControlHandler
         
         rotateSelectionNode = SKSpriteNode(texture: horizontalCircleTexture)
-        rotateSelectionNode.position = CGPoint(x: frame.midX, y: 0.73 * frame.height)  // near top, center
+        rotateSelectionNode.position = CGPoint(x: frame.midX, y: 0.73 * frame.height)  // above holding point
         addChild(rotateSelectionNode)
         
         flipSelectionNode = SKSpriteNode(texture: verticalCircleTexture)
-        flipSelectionNode.position = CGPoint(x: 0.65 * frame.width, y: 0.65 * frame.height)  // near top, right
+        flipSelectionNode.position = CGPoint(x: 0.65 * frame.width, y: 0.65 * frame.height)  // right of holding point
         addChild(flipSelectionNode)
         
         dropSelectionNode = SKSpriteNode(texture: downArrowTexture)
-        dropSelectionNode.position = CGPoint(x: frame.midX, y: 0.58 * frame.height)  // near top, left
+        dropSelectionNode.position = CGPoint(x: frame.midX, y: 0.58 * frame.height)  // below holding point
         addChild(dropSelectionNode)
         
         orientationControlIsHidden = true
