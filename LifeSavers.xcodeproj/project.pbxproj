@@ -46,7 +46,6 @@
 			isa = PBXGroup;
 			children = (
 				4ACD9C4D2868C8430079A15D /* LifeSavers */,
-				4ACD9C612868C8800079A15D /* Supporting Files */,
 				4ACD9C4C2868C8430079A15D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -68,6 +67,7 @@
 				4ADD7909287F660E009FB532 /* Hud.swift */,
 				4ADD790D2884AE1D009FB532 /* Utilities.swift */,
 				4ACD9C502868C8430079A15D /* art.scnassets */,
+				4ACD9C612868C8800079A15D /* Supporting Files */,
 			);
 			path = LifeSavers;
 			sourceTree = "<group>";
