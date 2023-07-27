@@ -4,6 +4,19 @@
 //
 //  Created by Phil Stern on 6/27/22.
 //
+//            y
+//       _____|_____
+//      /     |0    \  numbers 0 - 3 are the indices into the front and back arrays
+//     /     _|_     \
+//    / 3   / | \   1 \
+//   |\     \___/     /|
+//   | \    front    / |---- x
+//   |  \_____2_____/  |
+//    \ |           | /
+//     \|_____|_____|/
+//            |
+//            z
+//
 
 import UIKit
 import SceneKit
@@ -32,7 +45,7 @@ class LifeSaverNode: SCNNode {
     var number = 0
     var stackPosition = 0
     var isPlayed = false
-    var front = [Feature]()  // north, east, south, west side
+    var front = [Feature]()  // see picture in header notes for position of indices
     var back = [Feature]()
     
     var quarterTurns: Int {

@@ -4,8 +4,10 @@
 //
 //  Created by Phil Stern on 4/24/21.
 //
-//  Hud is set up in GameViewController.setupHud to take up the whole screen.
-//  It has a circular arrow button to rotate the selected life saver node.
+//  Hud is set up in GameViewController.setupHud to take up the whole screen.  Hud has circular arrow
+//  nodes to rotate the selected life saver node, and an arrow node to drop the selected life saver
+//  onto the stack.  The actual movement is handled by GameViewController when the nodes are touched,
+//  by calling a corresponding callback handler below.
 //
 
 import Foundation
@@ -15,9 +17,11 @@ class Hud: SKScene {
     var rotateControlHandler: (() -> Void)?
     var flipControlHandler: (() -> Void)?
     var dropControlHandler: (() -> Void)?
+    
     var rotateSelectionNode = SKSpriteNode()
     var flipSelectionNode = SKSpriteNode()
     var dropSelectionNode = SKSpriteNode()
+    
     let horizontalCircleTexture = SKTexture(imageNamed: "horizontal circle")
     let verticalCircleTexture = SKTexture(imageNamed: "vertical circle")
     let downArrowTexture = SKTexture(imageNamed: "down arrow")

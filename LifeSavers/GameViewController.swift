@@ -4,6 +4,27 @@
 //
 //  Created by Phil Stern on 6/26/22.
 //
+//  LifeSaverNodes use scenes created in Blender (see "art" folder).  They do not have physics bodies.
+//  Logic is use to determine if LifeSaverNodes fit together, rather than "contacts" created by the
+//  physics engine.
+//
+//  Importing model from Blender
+//  ----------------------------
+//  - Add "life saver 0.dae" to art folder
+//  - Select the life saver in the Scene graph
+//    - Material inspector | + | Shading: Lambert | Diffuse: pick a color (R: 255, G: 253, B: 216)
+//    - Node inspector | Identity | Name: LifeSaver
+//    - Editor (top menu) | Convert to SceneKit file format (.scn)
+//    - Delete "life saver 0.dae" (blue wire-frame cube icon)
+//
+//  Blender axes     SceneKit axes
+//   blue               green
+//     z  y green         y
+//     | /                |
+//     |/___ x red        |___ x red
+//                       /
+//                      z blue
+//
 
 import UIKit
 import QuartzCore
@@ -71,8 +92,8 @@ class GameViewController: UIViewController {
         for (index, startingPosition) in startingPositions.enumerated() {
             let lifeSaverNode = LifeSaverNode(number: index)
             lifeSaverNode.position = startingPosition
-            lifeSaverNode.eulerAngles.y = [0, .pi / 2, .pi, 3 * .pi / 2].randomElement()!
-            lifeSaverNode.eulerAngles.x = [0, .pi].randomElement()!
+            lifeSaverNode.eulerAngles.y = [0, .pi / 2, .pi, 3 * .pi / 2].randomElement()!  // rotation around center hole
+            lifeSaverNode.eulerAngles.x = [0, .pi].randomElement()!  // flip front or back up
             lifeSaverNodes.append(lifeSaverNode)
             scnScene.rootNode.addChildNode(lifeSaverNode)
         }
@@ -96,7 +117,7 @@ class GameViewController: UIViewController {
     }
     
     private func dropSelectedLifeSaver() {
-        scnView.gestureRecognizers?.forEach { $0.isEnabled = false }  // temporarily disable gestures, to prevent simultaneous drop and tap (return to holding)
+        scnView.gestureRecognizers?.forEach { $0.isEnabled = false }  // temporarily disable gestures, to prevent simultaneous hud button and screen tap
         if let selectedLifeSaverNode = selectedLifeSaverNode {
             let gapSize = stackGap  // store it to avoid re-computing at each use
             selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
@@ -108,8 +129,8 @@ class GameViewController: UIViewController {
         scnView.gestureRecognizers?.forEach { $0.isEnabled = true }
     }
     
-    // determine number of stack spaces that will be left open if selected
-    // life saver is dropped onto stack (due to pegs not aligning with holes)
+    // determine number of stack spaces that will be left open if selected life saver is dropped
+    // onto stack (due to pegs not aligning with holes, or holes not deep enough for long pegs)
     private var stackGap: Int {
         var gapSize = 0
         if stack.count > 0 {
