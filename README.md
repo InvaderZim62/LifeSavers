@@ -1,6 +1,6 @@
 # Life Savers Puzzle
 
-I can't remember where I got this puzzle, but it's very challenging.  I deceided to get more
+I can't remember where I got this puzzle, but it's very challenging.  I decided to get more
 practive with SceneKit and Blender, so I turned it into an app.
 
 There are 12 life savers, and only one way they all fit together.  Tap a life saver to move it
