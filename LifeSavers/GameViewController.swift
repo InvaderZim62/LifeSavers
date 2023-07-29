@@ -46,7 +46,6 @@ class GameViewController: UIViewController {
     var hud = Hud()
     var lifeSaverNodes = [LifeSaverNode]()
     var startingPositions = [SCNVector3]()
-    var stackPositions = [SCNVector3]()
     var holdingPosition = SCNVector3(0, 0.85, 0)
     var positionIndex = 0
     var pastAngle: Float = 0.0
@@ -73,7 +72,6 @@ class GameViewController: UIViewController {
         setupView()
         setupHud()
         computeStartingPositions()
-        computeStackPositions()
         createLifeSaverNodes()
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -120,7 +118,7 @@ class GameViewController: UIViewController {
     private func dropSelectedLifeSaver() {
         guard let selectedLifeSaverNode = selectedLifeSaverNode else { return }
         let gapSize = stackGap  // store it to avoid re-computing at each use
-        selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
+        selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositionFor(index: positionIndex + gapSize), duration: Constants.moveDuration))
         selectedLifeSaverNode.isPlayed = true
         selectedLifeSaverNode.stackPosition = positionIndex + gapSize
         self.selectedLifeSaverNode = nil
@@ -142,7 +140,7 @@ class GameViewController: UIViewController {
             var stackTopPenetration = stackTopFeature.penetration
             if currentStack.count > 1 && stackTopFeature == .hole {
                 // consider effect on penetration of second-from-top life saver, if top life saver has hole
-                let secondFromTop = currentStack[currentStack.count - 2]
+//                let secondFromTop = currentStack[currentStack.count - 2]
                 let secondFromTopIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedIndex)
                 let secondFromTopFeature = secondFromTop.upperFeatureAt(index: secondFromTopIndex)
                 let secondFromTopPenetration = secondFromTopFeature.penetration
@@ -242,14 +240,11 @@ class GameViewController: UIViewController {
         let positionAngle = atan2(vector.z, vector.x).wrap2Pi
         return Int(round(2 * positionAngle / .pi) + 1) % 4
     }
-
-    private func computeStackPositions() {
-        for n in 0..<Constants.lifeSaverCount {
-            let y =  Constants.lifeSaverWidth * (Double(n - 4) - Double(Constants.lifeSaverCount - 1) / 2)
-            stackPositions.append(SCNVector3(0, y, 0))
-        }
+    
+    private func stackPositionFor(index: Int) -> SCNVector3 {
+        SCNVector3(0, Constants.lifeSaverWidth * (Double(index - 4) - Double(Constants.lifeSaverCount - 1) / 2), 0)
     }
-
+    
     // compute 12 equally-spaced (shuffled) positions around an ellipse
     private func computeStartingPositions() {
         let a = 1.0  // horizontal radius
