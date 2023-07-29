@@ -57,13 +57,13 @@ class Hud: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first!
         let location = touch.location(in: self)
-        if rotateSelectionNode.contains(location) {
+        if !rotateSelectionNode.isHidden && rotateSelectionNode.contains(location) {
             rotateControlHandler?()
         }
-        if flipSelectionNode.contains(location) {
+        if !flipSelectionNode.isHidden && flipSelectionNode.contains(location) {
             flipControlHandler?()
         }
-        if dropSelectionNode.contains(location) {
+        if !dropSelectionNode.isHidden && dropSelectionNode.contains(location) {
             dropControlHandler?()
         }
     }

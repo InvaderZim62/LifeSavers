@@ -103,33 +103,28 @@ class GameViewController: UIViewController {
     
     // called by touching hud upper circle-arrow
     private func rotateSelectedLifeSaver() {
-        if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration)) {
-                // state not changed until action complete
-            }
+        guard let selectedLifeSaverNode = selectedLifeSaverNode else { return }
+        selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: 0, y: .pi / 2, z: 0, duration: Constants.moveDuration)) {
+            // state not changed until action complete
         }
     }
     
     // called by touching hud side circle-arrow
     private func flipSelectedLifeSaver() {
-        if let selectedLifeSaverNode = selectedLifeSaverNode {
-            selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration)) {
-            }
+        guard let selectedLifeSaverNode = selectedLifeSaverNode else { return }
+        selectedLifeSaverNode.runAction(SCNAction.rotateBy(x: .pi, y: 0, z: 0, duration: Constants.moveDuration)) {
         }
     }
     
     // called by touching hud down-arrow
     private func dropSelectedLifeSaver() {
-        scnView.gestureRecognizers?.forEach { $0.isEnabled = false }  // temporarily disable gestures, to prevent simultaneous hud button and screen tap
-        if let selectedLifeSaverNode = selectedLifeSaverNode {
-            let gapSize = stackGap  // store it to avoid re-computing at each use
-            selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
-            selectedLifeSaverNode.isPlayed = true
-            selectedLifeSaverNode.stackPosition = positionIndex + gapSize
-            self.selectedLifeSaverNode = nil
-            positionIndex += (1 + gapSize)
-        }
-        scnView.gestureRecognizers?.forEach { $0.isEnabled = true }
+        guard let selectedLifeSaverNode = selectedLifeSaverNode else { return }
+        let gapSize = stackGap  // store it to avoid re-computing at each use
+        selectedLifeSaverNode.runAction(SCNAction.move(to: stackPositions[positionIndex + gapSize], duration: Constants.moveDuration))
+        selectedLifeSaverNode.isPlayed = true
+        selectedLifeSaverNode.stackPosition = positionIndex + gapSize
+        self.selectedLifeSaverNode = nil
+        positionIndex += (1 + gapSize)
     }
     
     // determine number of stack spaces that will be left open if selected life saver is dropped
