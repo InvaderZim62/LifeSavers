@@ -130,61 +130,31 @@ class GameViewController: UIViewController {
     // determine number of stack spaces that will be left open if selected life saver is dropped
     // onto stack (due to pegs not aligning with holes, or holes not deep enough for long pegs)
     private var stackGap: Int {
-        var gapSize = 0
         let currentStack = stack  // store it to avoid re-computing at each use
-        if currentStack.count > 0 {
-            let stackTop = currentStack.last!
-            // check if peg on bottom of selected life saver fits hole in top of stack
-            if let selectedShortPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .shortPeg) : selectedLifeSaverNode!.back.firstIndex(of: .shortPeg) {
-                let stackTopIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedShortPegIndex)
-                if stackTop.front[stackTopIndex] != .hole {
-                    gapSize += 1
-                } else if currentStack.count > 1 {
-                    // check if hole in top of stack is plugged by long peg below it (assumes top two fit tight)
-                    let secondFromTop = currentStack[currentStack.count - 2]
-                    let secondFromTopIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedShortPegIndex)
-                    let secondFromTopFeature = secondFromTop.isFlipped ? secondFromTop.back[secondFromTopIndex] : secondFromTop.front[secondFromTopIndex]
-                    if secondFromTopFeature == .longPeg {
-                        gapSize += 1
-                    }
-                }
-            } else if let selectedLongPegIndex = selectedLifeSaverNode!.isFlipped ? selectedLifeSaverNode!.front.firstIndex(of: .longPeg) : selectedLifeSaverNode!.back.firstIndex(of: .longPeg) {
-                let stackTopIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedLongPegIndex)
-                if stackTop.front[stackTopIndex] != .hole {
-                    gapSize += 1
-                } else if currentStack.count > 1 {
-                    // check if long peg on bottom of selected life saver fits hole in second-from-top of stack
-                    let secondFromTop = currentStack[currentStack.count - 2]
-                    let secondFromTopIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedLongPegIndex)
-                    if secondFromTop.front[secondFromTopIndex] != .hole {
-                        gapSize += 1
-                    }
-                }
-            }
-            
-            // check if pegs on top of stack fit holes in selected life saver
-            if let stackTopShortPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .shortPeg) : stackTop.front.firstIndex(of: .shortPeg) {
-                let selectIndex = indexOnNode(selectedLifeSaverNode!, alignedWithNode: stackTop, atIndex: stackTopShortPegIndex)
-                if selectedLifeSaverNode!.front[selectIndex] != .hole {
-                    gapSize += 1
-                }
-            } else if let stackTopLongPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .longPeg) : stackTop.front.firstIndex(of: .longPeg) {
-                let selectIndex = indexOnNode(selectedLifeSaverNode!, alignedWithNode: stackTop, atIndex: stackTopLongPegIndex)
-                if selectedLifeSaverNode!.front[selectIndex] != .hole {
-                    gapSize += 1
-                }
-            } else if currentStack.count > 1 {
-                // check if long peg in second-from-top life saver fits holes in selected life saver
+        guard currentStack.count > 0 else { return 0 }  // no gap for first life saver dropped onto stack
+        
+        let stackTop = currentStack[currentStack.count - 1]
+        var maxGap = -2
+        
+        for selectedIndex in 0..<4 {
+            let stackTopIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedIndex)
+            let stackTopFeature = stackTop.upperFeatureAt(index: stackTopIndex)
+            var stackTopPenetration = stackTopFeature.penetration
+            if currentStack.count > 1 && stackTopFeature == .hole {
+                // consider effect on penetration of second-from-top life saver, if top life saver has hole
                 let secondFromTop = currentStack[currentStack.count - 2]
-                if let secondFromTopLongPegIndex = secondFromTop.isFlipped ? secondFromTop.back.firstIndex(of: .longPeg) : secondFromTop.front.firstIndex(of: .longPeg) {
-                    let selectIndex = indexOnNode(selectedLifeSaverNode!, alignedWithNode: stackTop, atIndex: secondFromTopLongPegIndex)
-                    if selectedLifeSaverNode!.front[selectIndex] != .hole {
-                        gapSize += 1
-                    }
-                }
+                let secondFromTopIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedIndex)
+                let secondFromTopFeature = secondFromTop.upperFeatureAt(index: secondFromTopIndex)
+                let secondFromTopPenetration = secondFromTopFeature.penetration
+                stackTopPenetration = secondFromTopPenetration - 1
+            }
+            let selectedFeature = selectedLifeSaverNode!.lowerFeatureAt(index: selectedIndex)
+            let gap = max(selectedFeature.penetration + stackTopPenetration, 0)
+            if gap > maxGap {
+                maxGap = gap
             }
         }
-        return gapSize
+        return maxGap
     }
     
     // determine which index of node1 aligns with the provided index of node2, by first computing a unit

@@ -34,6 +34,19 @@ enum Feature {
     case shortPeg
     case longPeg
     case none
+    
+    var penetration: Int {
+        switch self {
+        case .hole:
+            return -2
+        case .shortPeg:
+            return 1
+        case .longPeg:
+            return 2
+        case .none:
+            return 0
+        }
+    }
 }
 
 class LifeSaverNode: SCNNode {
@@ -55,6 +68,14 @@ class LifeSaverNode: SCNNode {
     var isFlipped: Bool {
         Int((eulerAngles.x / .pi).rounded()) % 2 == 1
     }
+    
+    func upperFeatureAt(index: Int) -> Feature {
+        isFlipped ? back[index] : front[index]
+    }
+
+    func lowerFeatureAt(index: Int) -> Feature {
+        isFlipped ? front[index] : back[index]
+    }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -71,7 +92,7 @@ class LifeSaverNode: SCNNode {
         switch number {
         case 0:
             front = [.hole, .none, .none, .longPeg]
-            back = [.none, .none, .none, .none]
+            back = [.hole, .none, .none, .none]
         case 1:
             front = [.none, .none, .hole, .hole]
             back = [.shortPeg, .none, .hole, .hole]
@@ -108,7 +129,7 @@ class LifeSaverNode: SCNNode {
         default:
             break
         }
-//        addLabel(text: String(number))  // use for debugging
+        addLabel(text: String(number))  // use for debugging
     }
 
     // add text to top of face of life saver
