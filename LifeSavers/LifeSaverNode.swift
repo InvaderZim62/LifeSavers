@@ -129,7 +129,7 @@ class LifeSaverNode: SCNNode {
         default:
             break
         }
-        addLabel(text: String(number))  // use for debugging
+//        addLabel(text: String(number))  // use for debugging
     }
 
     // add text to top of face of life saver
