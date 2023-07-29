@@ -138,9 +138,8 @@ class GameViewController: UIViewController {
             let stackTopIndex = indexOnNode(stackTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedIndex)
             let stackTopFeature = stackTop.upperFeatureAt(index: stackTopIndex)
             var stackTopPenetration = stackTopFeature.penetration
-            if currentStack.count > 1 && stackTopFeature == .hole {
+            if stackTopFeature == .hole, let secondFromTop = currentStack.first(where: { $0.stackPosition == stackTop.stackPosition - 1 }) {
                 // consider effect on penetration of second-from-top life saver, if top life saver has hole
-//                let secondFromTop = currentStack[currentStack.count - 2]
                 let secondFromTopIndex = indexOnNode(secondFromTop, alignedWithNode: selectedLifeSaverNode!, atIndex: selectedIndex)
                 let secondFromTopFeature = secondFromTop.upperFeatureAt(index: secondFromTopIndex)
                 let secondFromTopPenetration = secondFromTopFeature.penetration
