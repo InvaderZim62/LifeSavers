@@ -166,7 +166,6 @@ class GameViewController: UIViewController {
                     }
                 }
             }
-            if gapSize > 0 { return gapSize }
             
             // check if pegs on top of stack fit holes in selected life saver
             if let stackShortPegIndex = stackTop.isFlipped ? stackTop.back.firstIndex(of: .shortPeg) : stackTop.front.firstIndex(of: .shortPeg) {
