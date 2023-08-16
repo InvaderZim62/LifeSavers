@@ -71,7 +71,7 @@ class GameViewController: UIViewController {
         setupCamera()
         setupView()
         setupHud()
-        computeStartingPositions()
+        startingPositions = getEvenlySpacedEllipticalPoints(number: Constants.lifeSaverCount, horizontalRadius: 1, verticalRadius: 2).shuffled()
         createLifeSaverNodes()
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -246,19 +246,18 @@ class GameViewController: UIViewController {
         SCNVector3(0, Constants.lifeSaverWidth * (Double(index - 4) - Double(Constants.lifeSaverCount - 1) / 2), 0)
     }
     
-    // compute 12 equally-spaced (shuffled) positions around an ellipse
-    private func computeStartingPositions() {
-        let a = 1.0  // horizontal radius
-        let b = 2.0  // vertical radius
+    // compute equally-spaced positions around a 3D ellipse at z = 0
+    private func getEvenlySpacedEllipticalPoints(number: Int, horizontalRadius a: Double, verticalRadius b: Double) -> [SCNVector3] {
+        var points = [SCNVector3]()
         let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
-        // Note: will have less than 12 life savers, if circumference is over-estimated
-        let desiredSpacing = circumference / Double(Constants.lifeSaverCount)
-        let testCount = 200
+        // Note: will have less than 7 shapes, if circumference is over-estimated
+        let desiredSpacing = circumference / Double(number)
+        let resolution = 100  // check every 100/360 deg for next position with desired spacing
         var pastX = 10.0
         var pastY = 10.0
         var count = 0
-        for n in 0..<testCount {
-            let theta = Double(n) * 2 * Double.pi / Double(testCount)
+        for n in 0..<resolution {
+            let theta = Double(n) * 2 * Double.pi / Double(resolution)
             let sinT2 = pow(sin(theta), 2)
             let cosT2 = pow(cos(theta), 2)
             let radius = a * b / sqrt(a * a * sinT2 + b * b * cosT2)
@@ -266,13 +265,13 @@ class GameViewController: UIViewController {
             let y = radius * sin(theta)
             let spacing = sqrt(pow((x - pastX), 2) + pow(y - pastY, 2))
             if spacing > desiredSpacing {
-                startingPositions.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
+                points.append(SCNVector3(radius * cos(theta), radius * sin(theta), 0))
                 count += 1
-                if count == Constants.lifeSaverCount { break }
+                if count == number { break }
                 pastX = x
                 pastY = y
             }
         }
-        startingPositions.shuffle()
+        return points
     }
 }
