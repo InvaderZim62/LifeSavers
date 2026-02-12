@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A91BF152F3D7EFD0024E161 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A91BF142F3D7EFD0024E161 /* SceneDelegate.swift */; };
 		4ACD9C4F2868C8430079A15D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACD9C4E2868C8430079A15D /* AppDelegate.swift */; };
 		4ACD9C512868C8430079A15D /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ACD9C502868C8430079A15D /* art.scnassets */; };
 		4ACD9C532868C8430079A15D /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACD9C522868C8430079A15D /* GameViewController.swift */; };
@@ -19,6 +20,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4A91BF142F3D7EFD0024E161 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		4A91BF162F3D7F210024E161 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4ACD9C4B2868C8430079A15D /* LifeSavers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeSavers.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ACD9C4E2868C8430079A15D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ACD9C502868C8430079A15D /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -68,6 +71,7 @@
 				4ADD790D2884AE1D009FB532 /* Utilities.swift */,
 				4ACD9C502868C8430079A15D /* art.scnassets */,
 				4ACD9C612868C8800079A15D /* Supporting Files */,
+				4A91BF162F3D7F210024E161 /* Info.plist */,
 			);
 			path = LifeSavers;
 			sourceTree = "<group>";
@@ -76,6 +80,7 @@
 			isa = PBXGroup;
 			children = (
 				4ACD9C4E2868C8430079A15D /* AppDelegate.swift */,
+				4A91BF142F3D7EFD0024E161 /* SceneDelegate.swift */,
 				4ACD9C572868C8450079A15D /* Assets.xcassets */,
 				4ACD9C592868C8450079A15D /* LaunchScreen.storyboard */,
 			);
@@ -159,6 +164,7 @@
 				4ACD9C532868C8430079A15D /* GameViewController.swift in Sources */,
 				4ACD9C4F2868C8430079A15D /* AppDelegate.swift in Sources */,
 				4ACD9C82286A72800079A15D /* LifeSaverNode.swift in Sources */,
+				4A91BF152F3D7EFD0024E161 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,6 +313,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 65Z9KA7SHC;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeSavers/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -335,6 +342,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 65Z9KA7SHC;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeSavers/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

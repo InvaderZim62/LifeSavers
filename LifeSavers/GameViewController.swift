@@ -4,12 +4,13 @@
 //
 //  Created by Phil Stern on 6/26/22.
 //
-//  LifeSaverNodes use scenes created in Blender (see "art" folder).  They do not have physics bodies.
+//  LifeSaverNode uses scenes created in Blender (see "art" folder).  They do not have physics bodies.
 //  Logic is use to determine if LifeSaverNodes fit together, rather than "contacts" created by the
 //  physics engine.
 //
-//  Importing model from Blender
+//  Importing model from Blender (see Documents | iPhone | Life Saver | instructions.txt for making 3D models)
 //  ----------------------------
+//  - Export Blender model as collada (.dae) file
 //  - Add "life saver 0.dae" to art folder
 //  - Select the life saver in the Scene graph
 //    - Material inspector | + | Shading: Lambert | Diffuse: pick a color (R: 255, G: 253, B: 216)
@@ -213,7 +214,7 @@ class GameViewController: UIViewController {
     
     private func setupView() {
         scnView = self.view as? SCNView
-        scnView.allowsCameraControl = true  // true: allow standard camera controls with swiping
+        scnView.allowsCameraControl = true  // true: allow standard camera controls with panning
         scnView.showsStatistics = true
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
@@ -250,9 +251,9 @@ class GameViewController: UIViewController {
     private func getEvenlySpacedEllipticalPoints(number: Int, horizontalRadius a: Double, verticalRadius b: Double) -> [SCNVector3] {
         var points = [SCNVector3]()
         let circumference = 1.85 * Double.pi * sqrt((a * a + b * b) / 2) // reasonable approximation (no exact solution)
-        // Note: will have less than 7 shapes, if circumference is over-estimated
+        // Note: will have less than "number" shapes, if circumference is over-estimated
         let desiredSpacing = circumference / Double(number)
-        let resolution = 100  // check every 100/360 deg for next position with desired spacing
+        let resolution = 200  // check every 1.8 deg for next position with desired spacing
         var pastX = 10.0
         var pastY = 10.0
         var count = 0
